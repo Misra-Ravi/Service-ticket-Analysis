@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
 <title>JCI Service Ticket Weekly Processor</title>
 <!-- SAP 72 font — served from SAP CDN -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=72:wght@400;600;700&display=swap">
@@ -398,6 +399,17 @@
     color: var(--text-secondary);
     margin-top: 8px;
   }
+  .note-prio {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 10px;
+  }
+  .prio-intro {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+  .dim-sm { font-size: 11px; }
   code {
     font-family: var(--mono);
     font-size: 11.5px;
@@ -412,7 +424,7 @@
 
 <!-- SAP Shell Bar -->
 <div class="shell-bar">
-  <a class="shell-logo" href="https://github.com/Misra-Ravi/Service-ticket-Analysis" target="_blank">
+  <a class="shell-logo" href="https://github.com/Misra-Ravi/Service-ticket-Analysis" target="_blank" rel="noopener">
     <!-- SAP logo mark (simplified SVG) -->
     <svg width="36" height="18" viewBox="0 0 36 18" fill="none">
       <rect width="36" height="18" rx="2" fill="#0070F2"/>
@@ -421,7 +433,7 @@
     <span class="shell-app-name">Service Ticket Processor</span>
   </a>
   <div class="shell-spacer"></div>
-  <a class="shell-gh" href="https://github.com/Misra-Ravi/Service-ticket-Analysis" target="_blank">
+  <a class="shell-gh" href="https://github.com/Misra-Ravi/Service-ticket-Analysis" target="_blank" rel="noopener">
     <svg class="gh-icon" viewBox="0 0 16 16">
       <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
                0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
@@ -437,8 +449,8 @@
     Misra-Ravi / Service-ticket-Analysis
   </a>
   <span class="shell-gh-sep">|</span>
-  <a class="shell-gh" href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/scripts/process_tickets.py" target="_blank">process_tickets.py</a>
-  <a class="shell-gh" href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/vba/modJCITracker.bas" target="_blank">modJCITracker.bas</a>
+  <a class="shell-gh" href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/scripts/process_tickets.py" target="_blank" rel="noopener">process_tickets.py</a>
+  <a class="shell-gh" href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/vba/modJCITracker.bas" target="_blank" rel="noopener">modJCITracker.bas</a>
 </div>
 
 <div class="page">
@@ -522,7 +534,7 @@
       <div class="op-row">
         <div class="case">24392/2026</div>
         <div class="dim">MRP Batch Job performance Issue</div>
-        <div class="dim" style="font-size:11px">Customer Action</div>
+        <div class="dim dim-sm">Customer Action</div>
         <div class="dim">High</div>
         <div class="aging">174</div>
         <div><span class="pill pill-warning">HIGH</span></div>
@@ -531,7 +543,7 @@
       <div class="op-row">
         <div class="case">313150/2026</div>
         <div class="dim">Revenue recognition delta in KE24</div>
-        <div class="dim" style="font-size:11px">Customer Action</div>
+        <div class="dim dim-sm">Customer Action</div>
         <div class="dim">High</div>
         <div class="aging">113</div>
         <div><span class="pill pill-warning">HIGH</span></div>
@@ -540,7 +552,7 @@
       <div class="op-row">
         <div class="case">393839/2026</div>
         <div class="dim">Delivery creation error for STO</div>
-        <div class="dim" style="font-size:11px">Customer Action</div>
+        <div class="dim dim-sm">Customer Action</div>
         <div class="dim">Medium</div>
         <div class="aging">97</div>
         <div><span class="pill pill-neutral">MEDIUM HIGH</span></div>
@@ -549,7 +561,7 @@
       <div class="op-row">
         <div class="case">613481/2026</div>
         <div class="dim">Stage hookfiles G335/G338/G339</div>
-        <div class="dim" style="font-size:11px">SAP Proposed</div>
+        <div class="dim dim-sm">SAP Proposed</div>
         <div class="dim">Very High</div>
         <div class="aging">55</div>
         <div><span class="pill pill-error">VERY HIGH</span></div>
@@ -558,7 +570,7 @@
       <div class="op-row">
         <div class="case">596654/2026</div>
         <div class="dim">Auto sales tax Canada ship-from</div>
-        <div class="dim" style="font-size:11px">Sent to SAP</div>
+        <div class="dim dim-sm">Sent to SAP</div>
         <div class="dim">High</div>
         <div class="aging">18</div>
         <div><span class="pill pill-muted">—</span></div>
@@ -606,7 +618,7 @@
 
   <!-- Priority logic -->
   <h2>Customer Priority Logic</h2>
-  <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+  <p class="prio-intro">
     All three conditions must be true simultaneously. Missing any one → blank.
   </p>
   <table class="data-table">
@@ -640,7 +652,7 @@
       </tr>
     </tbody>
   </table>
-  <p class="note" style="margin-top:10px;">
+  <p class="note-prio">
     In-scope statuses:
     <code>Sent to SAP</code>
     <code>Customer Action</code>
@@ -713,9 +725,9 @@ Week N+1  →  drop new raw export, click <span class="hl-text">Refresh</span><b
       SAP MaxAttention — JCI Ticket Review Automation
     </div>
     <div class="links">
-      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis" target="_blank">GitHub</a>
-      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/README.md" target="_blank">README</a>
-      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/docs/architecture.md" target="_blank">Architecture</a>
+      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/README.md" target="_blank" rel="noopener">README</a>
+      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/docs/architecture.md" target="_blank" rel="noopener">Architecture</a>
     </div>
   </div>
 
