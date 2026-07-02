@@ -1,7 +1,9 @@
 # Output files
 output/
 *.xlsx
+# Allow sample data files
 !sample_data/*.xlsx
+!sample_data/*.csv
 
 # Python
 __pycache__/
