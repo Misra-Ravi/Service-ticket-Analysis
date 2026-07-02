@@ -1,0 +1,22 @@
+# Output files
+output/
+*.xlsx
+!sample_data/*.xlsx
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# macOS
+.DS_Store
+*.lock
+
+# Editor
+.vscode/
+.idea/
+*.swp
