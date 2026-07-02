@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JCI Service Ticket Weekly Processor</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0f1117;
+    --surface:  #1a1d27;
+    --border:   #2a2d3a;
+    --text:     #e2e4ed;
+    --muted:    #7a7f96;
+    --accent:   #4f8ef7;
+    --yellow:   #f7c948;
+    --green:    #3ecf8e;
+    --red:      #f76e6e;
+    --orange:   #f7a84f;
+    --code-bg:  #12141c;
+    --radius:   8px;
+    font-size: 15px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0 0 60px;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .topbar-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .gh-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    transition: border-color .15s;
+  }
+  .gh-link:hover { border-color: var(--accent); }
+  .gh-icon { width: 16px; height: 16px; fill: currentColor; }
+
+  /* ── Page shell ── */
+  .page { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── Header ── */
+  header { padding: 48px 0 32px; }
+  header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  header p {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 620px;
+  }
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 3px 9px;
+    border-radius: 4px;
+    border: 1px solid;
+  }
+  .badge-blue   { color: var(--accent);  border-color: var(--accent);  background: rgba(79,142,247,.08); }
+  .badge-green  { color: var(--green);   border-color: var(--green);   background: rgba(62,207,142,.08); }
+  .badge-yellow { color: var(--yellow);  border-color: var(--yellow);  background: rgba(247,201,72,.08); }
+
+  /* ── Section headings ── */
+  h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--muted);
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Problem / Solution cards ── */
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 10px;
+  }
+  .label-red    { color: var(--red); }
+  .label-green  { color: var(--green); }
+  .card ul { list-style: none; }
+  .card li {
+    font-size: 13px;
+    color: var(--muted);
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+  .card li::before {
+    content: "·";
+    position: absolute;
+    left: 4px;
+    color: var(--border);
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    flex-wrap: wrap;
+    row-gap: 20px;
+  }
+  .flow-step {
+    text-align: center;
+    flex: 1;
+    min-width: 100px;
+  }
+  .flow-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 18px;
+  }
+  .icon-blue   { background: rgba(79,142,247,.15); }
+  .icon-yellow { background: rgba(247,201,72,.15); }
+  .icon-green  { background: rgba(62,207,142,.15); }
+  .icon-orange { background: rgba(247,168,79,.15); }
+  .flow-step strong { display: block; font-size: 13px; color: var(--text); }
+  .flow-step span   { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .flow-arrow { color: var(--border); font-size: 20px; padding: 0 4px; flex-shrink: 0; }
+  @media (max-width: 620px) { .flow-arrow { display: none; } }
+
+  /* ── Column table ── */
+  .col-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .col-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .col-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    vertical-align: top;
+  }
+  .col-table tr:last-child td { border-bottom: none; }
+  .col-name { color: var(--text); font-family: "SFMono-Regular", Consolas, monospace; }
+  .col-new td { background: rgba(247,201,72,.04); }
+  .tag-new {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--yellow);
+    background: rgba(247,201,72,.12);
+    border-radius: 3px;
+    padding: 1px 6px;
+    margin-left: 6px;
+  }
+
+  /* ── Priority table ── */
+  .prio-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .prio-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .prio-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .prio-table tr:last-child td { border-bottom: none; }
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: .04em;
+  }
+  .pill-red    { background: rgba(247,110,110,.15); color: var(--red); }
+  .pill-orange { background: rgba(247,168,79,.15);  color: var(--orange); }
+  .pill-yellow { background: rgba(247,201,72,.15);  color: var(--yellow); }
+  .pill-muted  { background: rgba(122,127,150,.1);  color: var(--muted); }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    color: #abb2c4;
+  }
+  .code-block .c  { color: var(--muted); }            /* comment */
+  .code-block .kw { color: #c792ea; }                 /* keyword */
+  .code-block .s  { color: var(--green); }            /* string */
+  .code-block .f  { color: var(--accent); }           /* flag */
+  .code-block .p  { color: var(--yellow); }           /* path */
+  .code-tab-row { display: flex; gap: 2px; margin-bottom: -1px; }
+  .code-tab {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 6px 6px 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    cursor: pointer;
+    color: var(--muted);
+    background: var(--code-bg);
+    transition: color .15s;
+  }
+  .code-tab.active { color: var(--text); background: var(--code-bg); border-color: var(--border); }
+  .code-panel { display: none; }
+  .code-panel.active { display: block; }
+
+  /* ── Output preview ── */
+  .output-preview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .op-header {
+    display: grid;
+    grid-template-columns: 110px 260px 80px 80px 100px 120px 120px;
+    background: #1a2744;
+    font-size: 11px;
+    font-weight: 700;
+    color: #8ab4f8;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .op-header-new {
+    background: #2e2700;
+    color: var(--yellow);
+  }
+  .op-header > div, .op-row > div { padding: 8px 10px; border-right: 1px solid var(--border); }
+  .op-header > div:last-child, .op-row > div:last-child { border-right: none; }
+  .op-row {
+    display: grid;
+    grid-template-columns: 110px 260px 80px 80px 100px 120px 120px;
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .op-row:nth-child(even) { background: rgba(255,255,255,.02); }
+  .op-row .case  { color: var(--accent); font-family: monospace; }
+  .op-row .aging { color: var(--text); font-weight: 600; text-align: right; }
+  .op-row .muted { color: var(--muted); }
+  .op-row .upd   { color: var(--muted); font-style: italic; font-size: 11px; }
+  .op-scroll { overflow-x: auto; }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer a { color: var(--muted); text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <span class="topbar-label">Source</span>
+  <a class="gh-link" href="https://github.com/Misra-Ravi/Service-ticket-Analysis" target="_blank">
+    <svg class="gh-icon" viewBox="0 0 16 16">
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+               0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+               -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87
+               2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+               0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21
+               2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04
+               2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82
+               2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+               0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8
+               c0-4.42-3.58-8-8-8z"/>
+    </svg>
+    Misra-Ravi / Service-ticket-Analysis
+  </a>
+  <a class="gh-link" href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/scripts/process_tickets.py" target="_blank" style="font-size:12px; color:var(--muted);">
+    process_tickets.py
+  </a>
+  <a class="gh-link" href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/vba/modJCITracker.bas" target="_blank" style="font-size:12px; color:var(--muted);">
+    modJCITracker.bas
+  </a>
+</div>
+
+<div class="page">
+
+  <!-- Header -->
+  <header>
+    <h1>JCI Service Ticket Weekly Processor</h1>
+    <p>Transforms a raw ServiceNow SAPUI5 export into a business-ready Excel workbook —
+       aging, priority tiers, and carry-forward update logs, automated.</p>
+    <div class="badge-row">
+      <span class="badge badge-blue">Python + openpyxl</span>
+      <span class="badge badge-green">Excel VBA</span>
+      <span class="badge badge-yellow">ServiceNow</span>
+    </div>
+  </header>
+
+  <!-- Problem / Solution -->
+  <h2>Problem → Solution</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-label label-red">Raw export gaps</div>
+      <ul>
+        <li>No aging column — cannot see how old a ticket is</li>
+        <li>No business priority — SAP Priority ≠ review priority</li>
+        <li>No running log — meeting notes lost week to week</li>
+        <li>All 2,000+ rows visible — active tickets buried</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-label label-green">What this adds</div>
+      <ul>
+        <li>Aging and Last Update calculated in days (UTC-correct)</li>
+        <li>Customer Priority derived from Aging + Status + SAP Priority</li>
+        <li>Customer Update and SAP Update columns persist each week</li>
+        <li>Active tickets sorted to top, closed rows below</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Data flow -->
+  <h2>Data Flow</h2>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-icon icon-blue">📥</div>
+      <strong>ServiceNow</strong>
+      <span>SAPUI5 Export<br>.xlsx — 2,000+ rows</span>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon icon-yellow">⚙️</div>
+      <strong>Processor</strong>
+      <span>Python CLI or<br>Excel Refresh button</span>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon icon-orange">📋</div>
+      <strong>Previous week</strong>
+      <span>Carry-forward<br>Customer & SAP notes</span>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon icon-green">✅</div>
+      <strong>Output workbook</strong>
+      <span>47 active rows on top<br>sorted by urgency</span>
+    </div>
+  </div>
+
+  <!-- Output preview -->
+  <h2>Output — Current Week Sheet</h2>
+  <div class="output-preview">
+    <div class="op-scroll">
+      <div class="op-header">
+        <div>CASE</div>
+        <div>SUBJECT</div>
+        <div>STATUS</div>
+        <div>PRIORITY</div>
+        <div class="op-header-new">AGING ↑</div>
+        <div class="op-header-new">CUST. PRIORITY</div>
+        <div class="op-header-new">SAP UPDATE</div>
+      </div>
+      <div class="op-row">
+        <div class="case">24392/2026</div>
+        <div class="muted">MRP Batch Job performance Issue</div>
+        <div class="muted" style="font-size:11px">Customer Action</div>
+        <div class="muted">High</div>
+        <div class="aging">174</div>
+        <div><span class="pill pill-orange">HIGH</span></div>
+        <div class="upd">01/20: Ravi M. to validate…</div>
+      </div>
+      <div class="op-row">
+        <div class="case">313150/2026</div>
+        <div class="muted">Revenue recognition delta in KE24</div>
+        <div class="muted" style="font-size:11px">Customer Action</div>
+        <div class="muted">High</div>
+        <div class="aging">113</div>
+        <div><span class="pill pill-orange">HIGH</span></div>
+        <div class="upd">—</div>
+      </div>
+      <div class="op-row">
+        <div class="case">393839/2026</div>
+        <div class="muted">Delivery creation error for STO</div>
+        <div class="muted" style="font-size:11px">Customer Action</div>
+        <div class="muted">Medium</div>
+        <div class="aging">97</div>
+        <div><span class="pill pill-yellow">MEDIUM HIGH</span></div>
+        <div class="upd">—</div>
+      </div>
+      <div class="op-row">
+        <div class="case">613481/2026</div>
+        <div class="muted">Stage hookfiles G335/G338/G339</div>
+        <div class="muted" style="font-size:11px">SAP Proposed</div>
+        <div class="muted">Very High</div>
+        <div class="aging">55</div>
+        <div><span class="pill pill-red">VERY HIGH</span></div>
+        <div class="upd">Solution sent 05/14</div>
+      </div>
+      <div class="op-row">
+        <div class="case">596654/2026</div>
+        <div class="muted">Auto sales tax Canada ship-from</div>
+        <div class="muted" style="font-size:11px">Sent to SAP</div>
+        <div class="muted">High</div>
+        <div class="aging">18</div>
+        <div><span class="pill pill-muted">—</span></div>
+        <div class="upd">—</div>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:11px; color:var(--muted); margin-top:8px;">
+    Yellow-header columns are new additions. All other columns are original ServiceNow data (locked).
+    Active tickets sorted to top; 1,954 closed rows follow below.
+  </p>
+
+  <!-- Column reference -->
+  <h2>New Columns Added</h2>
+  <table class="col-table">
+    <thead>
+      <tr><th>Column</th><th>Type</th><th>Logic</th></tr>
+    </thead>
+    <tbody>
+      <tr class="col-new">
+        <td class="col-name">Aging <span class="tag-new">new</span></td>
+        <td>Integer (days)</td>
+        <td>today − CREATED ON (UTC), parsed as UTC datetime</td>
+      </tr>
+      <tr class="col-new">
+        <td class="col-name">Last Update <span class="tag-new">new</span></td>
+        <td>Integer (days)</td>
+        <td>today − UPDATED ON (UTC), parsed as UTC datetime</td>
+      </tr>
+      <tr class="col-new">
+        <td class="col-name">Customer Priority <span class="tag-new">new</span></td>
+        <td>VERY HIGH / HIGH / MEDIUM HIGH / blank</td>
+        <td>All 3 conditions required — see table below</td>
+      </tr>
+      <tr class="col-new">
+        <td class="col-name">Customer Update <span class="tag-new">new</span></td>
+        <td>Free text (editable)</td>
+        <td>Running log — carried forward from previous week via CASE key</td>
+      </tr>
+      <tr class="col-new">
+        <td class="col-name">SAP Update <span class="tag-new">new</span></td>
+        <td>Free text (editable)</td>
+        <td>Running log — carried forward from previous week via CASE key</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Priority logic -->
+  <h2>Customer Priority Logic</h2>
+  <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+    All three conditions must be true simultaneously. Missing any one → blank.
+  </p>
+  <table class="prio-table">
+    <thead>
+      <tr><th>Priority</th><th>Aging threshold</th><th>Status</th><th>SAP Priority</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="pill pill-red">VERY HIGH</span></td>
+        <td>&gt; 7 days</td>
+        <td>In-scope</td>
+        <td>Very High → Red</td>
+      </tr>
+      <tr>
+        <td><span class="pill pill-orange">HIGH</span></td>
+        <td>&gt; 30 days</td>
+        <td>In-scope</td>
+        <td>High → Yellow</td>
+      </tr>
+      <tr>
+        <td><span class="pill pill-yellow">MEDIUM HIGH</span></td>
+        <td>&gt; 60 days</td>
+        <td>In-scope</td>
+        <td>Medium → Green</td>
+      </tr>
+      <tr>
+        <td><span class="pill pill-muted">blank</span></td>
+        <td>Threshold not met</td>
+        <td>—</td>
+        <td>Low, or condition missing</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px; color:var(--muted); margin-top:10px;">
+    In-scope statuses: <code style="font-size:11px; color:var(--text)">Sent to SAP</code>&nbsp;
+    <code style="font-size:11px; color:var(--text)">Customer Action</code>&nbsp;
+    <code style="font-size:11px; color:var(--text)">SAP Proposed Solution</code>
+  </p>
+
+  <!-- Usage -->
+  <h2>Usage</h2>
+  <div class="code-tab-row">
+    <div class="code-tab active" onclick="showTab('python',this)">Python CLI</div>
+    <div class="code-tab" onclick="showTab('vba',this)">Excel VBA</div>
+  </div>
+
+  <div id="tab-python" class="code-panel active">
+    <div class="code-block"><span class="c"># Install</span>
+pip install -r requirements.txt
+
+<span class="c"># Basic — no carry-forward</span>
+python scripts/process_tickets.py <span class="f">--raw</span> <span class="p">"caseList 27.xlsx"</span>
+
+<span class="c"># With carry-forward from previous week</span>
+python scripts/process_tickets.py \
+    <span class="f">--raw</span>  <span class="p">"caseList 27.xlsx"</span> \
+    <span class="f">--prev</span> <span class="p">"caseList 26 Updated.xlsx"</span>
+
+<span class="c"># Override run date (testing / backdating)</span>
+python scripts/process_tickets.py \
+    <span class="f">--raw</span>  <span class="p">"caseList 27.xlsx"</span> \
+    <span class="f">--date</span> <span class="s">2026-07-09</span></div>
+  </div>
+
+  <div id="tab-vba" class="code-panel">
+    <div class="code-block"><span class="c">' One-time setup — import the VBA module</span>
+<span class="c">' VBA Editor (Option+F11) → File → Import File → vba/modJCITracker.bas</span>
+
+<span class="c">' Paste into ThisWorkbook module:</span>
+<span class="kw">Private Sub</span> Workbook_Open()
+    <span class="kw">On Error Resume Next</span>
+    ThisWorkbook.Sheets(<span class="s">"Update Log"</span>).Visible = xlSheetVeryHidden
+    <span class="kw">On Error GoTo</span> 0
+    ThisWorkbook.Protect Password:=<span class="s">"JCI2026"</span>, Structure:=<span class="kw">True</span>
+<span class="kw">End Sub</span>
+
+<span class="c">' Weekly: update Config B2 with new file path, then click button</span>
+<span class="c">' "Refresh This Week" → loads raw file, recalculates, carries forward notes</span></div>
+  </div>
+
+  <!-- Carry-forward -->
+  <h2>Carry-Forward — How Notes Persist</h2>
+  <div class="card" style="font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; line-height: 1.9; color: var(--muted);">
+    Week N  →  type notes in Customer Update / SAP Update<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓  save (Cmd+S or click Save Updates)<br>
+    <span style="color:var(--text)">Update Log</span> stores { CASE → notes } permanently (hidden sheet)<br>
+    <br>
+    Week N+1  →  drop new raw export, click Refresh<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓  match on <span style="color:var(--accent)">CASE</span> number<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓  notes reappear automatically on matched rows<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓  new cases get blank cells — ready for entry<br>
+    <br>
+    <span style="color:var(--green)">Nothing is ever lost.</span> Even closed tickets' notes are retained in the log.
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <span>SAP MaxAttention — JCI Ticket Review Automation</span>
+    <span>
+      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis" target="_blank">GitHub</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/README.md" target="_blank">Full README</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/docs/architecture.md" target="_blank">Architecture</a>
+    </span>
+  </footer>
+
+</div><!-- /page -->
+
+<script>
+function showTab(id, el) {
+  document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
