@@ -406,6 +406,70 @@
   }
   .gh-button:hover { background: var(--sap-blue); text-decoration: none; }
 
+  /* ── GitHub section card ─────────────────────────────────────── */
+  .gh-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .gh-section-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .gh-repo-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    font-family: var(--mono);
+  }
+  .gh-repo-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+  }
+  .gh-section-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .gh-primary-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--sap-navy);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: background .15s;
+  }
+  .gh-primary-btn:hover { background: var(--sap-blue); text-decoration: none; }
+  .gh-secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sap-blue);
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    background: var(--surface);
+    transition: border-color .15s, background .15s;
+  }
+  .gh-secondary-btn:hover { border-color: var(--sap-blue); background: var(--sap-blue-light); text-decoration: none; }
+
   /* ── Utility ─────────────────────────────────────────────────── */
   .note {
     font-size: 12px;
@@ -728,18 +792,28 @@ Week N+1  →  drop new raw export, click <span class="hl-text">Refresh</span><b
 <span class="hl-green">Nothing is ever lost.</span> Closed tickets' notes remain in the log indefinitely.
   </div>
 
-  <!-- Footer -->
-  <div class="page-footer">
-    <div class="brand">
-      <svg width="28" height="14" viewBox="0 0 28 14" fill="none">
-        <rect width="28" height="14" rx="2" fill="#0070F2"/>
-        <text x="4" y="10" font-family="Arial" font-size="8.5" font-weight="700" fill="white">SAP</text>
+  <!-- Source & Links -->
+  <h2>Source &amp; Links</h2>
+  <div class="gh-section">
+    <div class="gh-section-left">
+      <svg width="40" height="40" viewBox="0 0 16 16" fill="var(--text)">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                 -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+                 .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+                 -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0
+                 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82
+                 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01
+                 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
       </svg>
-      SAP MaxAttention — Weekly Incident Report Automation
+      <div>
+        <div class="gh-repo-name">Misra-Ravi / Service-ticket-Analysis</div>
+        <div class="gh-repo-desc">Python CLI + Excel VBA · sample data · full README</div>
+      </div>
     </div>
-    <div class="links">
-      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis" target="_blank" rel="noopener" class="gh-button">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="white">
+    <div class="gh-section-links">
+      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis" target="_blank" rel="noopener" class="gh-primary-btn">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="white">
           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
                    0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
                    -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
@@ -749,10 +823,22 @@ Week N+1  →  drop new raw export, click <span class="hl-text">Refresh</span><b
                    1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01
                    1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
         </svg>
-        Misra-Ravi / Service-ticket-Analysis
+        View on GitHub
       </a>
-      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/README.md" target="_blank" rel="noopener">README</a>
-      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/docs/architecture.md" target="_blank" rel="noopener">Architecture</a>
+      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/README.md" target="_blank" rel="noopener" class="gh-secondary-btn">README</a>
+      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/blob/main/docs/architecture.md" target="_blank" rel="noopener" class="gh-secondary-btn">Architecture</a>
+      <a href="https://github.com/Misra-Ravi/Service-ticket-Analysis/tree/main/sample_data" target="_blank" rel="noopener" class="gh-secondary-btn">Sample Data</a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    <div class="brand">
+      <svg width="28" height="14" viewBox="0 0 28 14" fill="none">
+        <rect width="28" height="14" rx="2" fill="#0070F2"/>
+        <text x="4" y="10" font-family="Arial" font-size="8.5" font-weight="700" fill="white">SAP</text>
+      </svg>
+      SAP MaxAttention — Weekly Incident Report Automation
     </div>
   </div>
 
